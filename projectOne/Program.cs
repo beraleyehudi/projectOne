@@ -46,6 +46,11 @@ namespace seriesProject
 
         }
 
+        void RaningTimeSavings(string ranTime)
+        {
+            Console.WriteLine($"Thanks to our sophisticated system, we save you {ranTime} running time.");
+        }
+
 
         void Start()
         {
@@ -83,7 +88,7 @@ namespace seriesProject
 
             List<string> seriesString = new List<string>(input.Split(" "));
             bool proper = true;
-            theLen = 8;
+            theLen = seriesString.Count;
             int i = 0;
 
             if (theLen < 3)
@@ -272,6 +277,10 @@ namespace seriesProject
                 sortedList = new List<int>(series);
                 sortedList.Sort();
             }
+            else
+            {
+                RaningTimeSavings("n*n");
+            }
             return sortedList;
 
         }
@@ -281,8 +290,9 @@ namespace seriesProject
             int max = series[0];
             if (sorted)
             {
+
                 emptyList[0] = sortedList[theLen - 1];
-                
+                RaningTimeSavings("n");
             }
             else
             {
@@ -306,6 +316,7 @@ namespace seriesProject
             if (sorted)
             {
                 emptyList[0] = sortedList[0];
+                RaningTimeSavings("n");
 
             }
             else

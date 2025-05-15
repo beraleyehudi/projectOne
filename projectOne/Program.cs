@@ -4,19 +4,27 @@ using System.ComponentModel.Design;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic;
 
 namespace seriesProject
 {
     internal class Program
     {
         // data
-        List<int> series = new List<int>();
-        List<int> sortedList = new List<int>();
-        List<int> emptyList = new List<int>() { 0};
-        bool sorted = false;
-        int theLen; 
-        Dictionary<string, string> menuData = new Dictionary<string, string>()
+        List<double> series = new List<double>(); // כאן נשמרת סדרת המספרים
+
+        List<double> sortedList = new List<double>(); // כאן נשמרת הרשימה הממויינת - לחסוך זמן ריצה
+
+        bool sorted = false; // כך אדע האם המשתמש כבר ביקש למיין
+
+        List<double> emptyList = new List<double>() { 0 }; // אינו נצרך - אך רציתי לחסוך כתיבת שורות - באמצעות משתנה זה
+        // פונקציית manage מבצעת קריאה אחת להדפסה
+
+        int theLen; // כיוון שפונקציית האימות צריכה לוודא את האורך - העדפתי להשתמש במה שהיא מפיקה ולא ליצור פונקציית אורך שתרוץ אן פעמים
+
+        Dictionary<string, string> menuData = new Dictionary<string, string>() // לולאת התפריט תעבור על המילון ותציג את האופציות
         {
             {"1", "Switch series"},
             {"2",  "print"},
@@ -29,14 +37,17 @@ namespace seriesProject
             {"9", "sum" },
             {"10", "exit from the program" }
         };
-        
+
 
         // פונקציות עזר
+
 
         string Input(string message)
         {
             Console.WriteLine(message);
+            Console.WriteLine("\n");
             string input = Console.ReadLine();
+            Console.WriteLine("\n");
             return input;
         }
 
@@ -52,6 +63,11 @@ namespace seriesProject
         }
 
 
+
+
+        // פונקציות חיצוניות
+
+
         void Start()
         {
 
@@ -59,92 +75,59 @@ namespace seriesProject
             sorted = false;
             string input = Input("enter a series of numbers" +
                 "(Numbers separated by spaces)");
-            
-            validation(input);
+
+            Validation(input);
         }
 
-        
-
-        // פונקציות חיצוניות
-
-        void validation(string input)
+        void Validation(string input)
         {
-            /* תיאור: מוודאת שהקלט תקין
-            * פירוט:
-            * data:
-            * 1 = משתנה בולייאן האם תקין
-            * 2 = משתנה מספר שמחזיק את אורך הרשימה 
-            * 
-            * פעולות:
-            * 1 הופכת לרשימה לפי הרווחים
-            * 2 מוודאת שהאורך תקין
-            * או שווה ל3
-            * 3 = רצה על הרשימה בלולאת ווייל עד אורך הרשימה
-            *   וכל עוד הבולייאן טרו
-            *   הבולייאן משתנה אם קיים מינוס או זהו איננו מספר
-            * 4 = אם המשתנה תקין שולחת הלאה, אם לא
-            *  קוראת לפונקציה הראשונה
-           */
+            int len = 0;
+            string[] listOfInput = input.Split();
 
-            List<string> seriesString = new List<string>(input.Split(" "));
-            bool proper = true;
-            theLen = seriesString.Count;
-            int i = 0;
+            foreach (string s in listOfInput)
+            {
+                if (double.TryParse(s, out double number) && number > 0)
+                {
+                    len++;
+                    ListOfNumbers(number);
 
+                }
+                else if (s == " ")
+                {
+                    continue;
+                }
+
+                else
+                {
+                    ErroreMeassge("You are entering numbers separated by a space.");
+                    Start();
+                }
+
+            }
+
+            theLen = len;
             if (theLen < 3)
             {
-                proper = false;
-
-            }
-            else
-            {
-                while (i < theLen && proper)
-                {
-                    foreach (char c in seriesString[i])
-                    {
-                        if (!(char.IsDigit(c)) || (c == '-'))
-                        {
-                            proper = false;
-                            break;
-                        }
-                    }
-                    i++;
-                }
-            }
-            if (proper)
-            {
-                ListOfInt(seriesString);
-            }
-            else
-            {
-                ErroreMeassge("You are entering numbers separated by a space.");
+                ErroreMeassge("you enter least 3 numbers");
                 Start();
             }
-
-
-
-           
         }
 
-        void ListOfInt(List<string> properInput)
+        void ListOfNumbers(double number)
         {
             /* תיאור: הופכת לרשימה של מספרים 
-             * ומעדכנת את "TheSeries"
-             * 
+             * מעדכנת את "series"
+             
              */
 
-            foreach(string number in properInput)
-            {
-                series.Add(int.Parse(number));
-            }
+
+            series.Add(number);
+
             Menu();
-            
+
 
 
         }
-
-       
-   
 
         void Menu()
         {
@@ -154,11 +137,11 @@ namespace seriesProject
              * פעולה:
              * רצה על המילון "menu" ומדפיסה למשתמש
              * וקוראת לפונקציה הבאה
-             */ 
-            foreach (KeyValuePair <string, string> pair in menuData)
-                {
-                    Console.WriteLine($"{pair.Key}. {pair.Value}");
-                }
+             */
+            foreach (KeyValuePair<string, string> pair in menuData)
+            {
+                Console.WriteLine($"{pair.Key}. {pair.Value}");
+            }
             Manage();
         }
 
@@ -179,7 +162,8 @@ namespace seriesProject
              * אלא אם אקסיט
              */
             string input = Input("type your chiose \n");
-            List<int> theObject = new List<int>();
+            Console.WriteLine("\n \n");
+            List<double> theObject = new List<double>();
             bool exit = false;
 
             switch (input)
@@ -217,7 +201,7 @@ namespace seriesProject
                     break;
 
                 case "9":
-                    theObject = Sum(); 
+                    theObject = Sum();
                     break;
 
                 case "10":
@@ -225,9 +209,9 @@ namespace seriesProject
                     break;
 
                 default:
-                ErroreMeassge("Enter a number between 1 and 10.");
-                Menu();
-                break;
+                    ErroreMeassge("Enter a number between 1 and 10.");
+                    Menu();
+                    break;
             }
             if (!exit)
             {
@@ -247,19 +231,27 @@ namespace seriesProject
 
         }
 
+
+
+
+
+
+
+
+
         // פונקציות פנימיות
 
-       void Print(List<int> theObject)
+        void Print(List<double> theObject)
         {
-            foreach (int i in theObject)
+            foreach (double i in theObject)
             {
                 Console.Write(i + " ");
             }
-            Console.WriteLine("\n");
+            Console.WriteLine("\n \n");
 
         }
 
-       void PrintReverse()
+        void PrintReverse()
         {
             for (int i = theLen - 1; i >= 0; i--)
             {
@@ -269,12 +261,12 @@ namespace seriesProject
 
         }
 
-        List<int> Sorts()
+        List<double> Sorts()
         {
             if (!sorted)
             {
                 sorted = true;
-                sortedList = new List<int>(series);
+                sortedList = series;
                 sortedList.Sort();
             }
             else
@@ -285,9 +277,9 @@ namespace seriesProject
 
         }
 
-        List<int> Max()
+        List<double> Max()
         {
-            int max = series[0];
+            double max = series[0];
             if (sorted)
             {
 
@@ -296,7 +288,7 @@ namespace seriesProject
             }
             else
             {
-                foreach (int i in series)
+                foreach (double i in series)
                 {
                     if (i > max)
                     {
@@ -310,9 +302,9 @@ namespace seriesProject
 
         }
 
-        List<int> Min()
+        List<double> Min()
         {
-            int min = series[0];
+            double min = series[0];
             if (sorted)
             {
                 emptyList[0] = sortedList[0];
@@ -321,11 +313,11 @@ namespace seriesProject
             }
             else
             {
-                foreach (int i in series)
+                foreach (double i in series)
                 {
                     if (i < min)
                     {
-                         min = i;
+                        min = i;
 
                     }
                 }
@@ -336,30 +328,26 @@ namespace seriesProject
 
         }
 
-        List<int> Avrerage()
+        List<double> Avrerage()
         {
-            int average =  Sum()[0] / Len()[0];
+            double average = Sum()[0] / Len()[0];
             emptyList[0] = average;
             return emptyList;
 
         }
 
-        List<int> Len()
+        List<double> Len()
         {
-            int len = 0;
-            foreach (int i in series)
-            {
-                len++;
-            }
-            emptyList[0] = len;
+
+            emptyList[0] = theLen;
             return emptyList;
 
         }
 
-        List<int> Sum()
+        List<double> Sum()
         {
-            int sum = 0;
-            foreach (int i in series)
+            double sum = 0;
+            foreach (double i in series)
             {
                 sum += i;
             }
@@ -372,7 +360,7 @@ namespace seriesProject
         static void Main(string[] args)
         {
             new Program().Start();
-            
+
 
 
         }
